@@ -1,136 +1,69 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>残業価値メーター</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>残業メーター</title>
 <style>
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#f4f6f8;margin:0;padding:16px}
-.container{max-width:720px;margin:auto}
-h1{text-align:center}
-.card{background:#fff;border-radius:14px;padding:16px;margin:12px 0;box-shadow:0 4px 10px rgba(0,0,0,.06)}
-label{display:block;margin-top:10px;font-size:14px}
-input,select{width:100%;padding:10px;margin-top:4px;border-radius:8px;border:1px solid #ccc;font-size:16px}
-.result{font-size:20px;font-weight:bold;margin-top:6px}
-.small{color:#666;font-size:13px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.hidden{display:none}
-@media(max-width:500px){.grid{grid-template-columns:1fr}}
+body{font-family:sans-serif;margin:20px;background:#fafafa}
+.card{background:white;padding:16px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.08);max-width:480px;margin:auto}
+input,select{width:100%;padding:10px;margin-top:8px;margin-bottom:14px;border-radius:8px;border:1px solid #ccc}
+.result{font-size:1.2em;font-weight:bold;margin-top:10px}
+.warn{color:#d00;font-weight:bold}
 </style>
 </head>
 <body>
-<div class="container">
-<h1>残業価値メーター</h1>
+
+<details style="margin-bottom:15px;background:#f3f4f6;padding:10px;border-radius:8px;max-width:480px;margin:auto;">
+  <summary style="font-weight:bold;cursor:pointer;">このツールの使い方</summary>
+  <div style="margin-top:10px;line-height:1.7;">
+    ・今日の残業時間を入力すると、今月の合計が自動計算されます<br>
+    ・過労ライン（45h）までの残り時間が表示されます<br>
+    ・ブラウザを閉じてもデータは保存されます<br>
+    <small>※データはあなたの端末内だけに保存され、外部送信されません</small>
+  </div>
+</details>
 
 <div class="card">
-<h2>基本情報</h2>
-<label>月給（円）<input id="salary" type="number"></label>
-<label>1日の労働時間<input id="hoursPerDay" type="number" step="0.1"></label>
-<label>月の労働日数<input id="days" type="number"></label>
-</div>
+<h2>残業メーター</h2>
 
-<div class="card">
-<h2>割増率設定</h2>
-<label>プリセット<select id="preset">
-<option value="legal">法定どおり</option>
-<option value="better">優遇企業（残業30%）</option>
-<option value="gov">公務員想定</option>
-<option value="custom">カスタム</option>
-</select></label>
-<div id="customBox" class="hidden">
-<label>残業倍率<input id="otRate" type="number" step="0.01" value="1.25"></label>
-<label>深夜倍率<input id="nightRate" type="number" step="0.01" value="1.50"></label>
-<label>休日倍率<input id="holidayRate" type="number" step="0.01" value="1.35"></label>
-</div>
-</div>
+<label>今日の残業時間（時間）</label>
+<input type="number" id="today" step="0.25">
 
-<div class="card">
-<h2>労働時間</h2>
-<label>残業時間<input id="overtime" type="number" step="0.1"></label>
-<label>深夜時間（22-5時）<input id="night" type="number" step="0.1"></label>
-<label>休日労働時間<input id="holiday" type="number" step="0.1"></label>
-</div>
+<label>割増率</label>
+<select id="rate">
+  <option value="1">通常</option>
+  <option value="1.25">25%</option>
+  <option value="1.5">50%</option>
+</select>
 
-<div class="card">
-<h2>結果</h2>
-<div class="grid">
-<div><div class="small">通常時給</div><div class="result" id="hourly">-</div></div>
-<div><div class="small">残業1時間の価値</div><div class="result" id="valueHour">-</div></div>
-<div><div class="small">残業代</div><div class="result" id="overtimePay">-</div></div>
-<div><div class="small">深夜手当</div><div class="result" id="nightPay">-</div></div>
-<div><div class="small">休日手当</div><div class="result" id="holidayPay">-</div></div>
-<div><div class="small">追加収入合計</div><div class="result" id="total">-</div></div>
-</div>
-</div>
+<div class="result">今月合計：<span id="total">0</span> h</div>
+<div class="result">過労ラインまで：<span id="remain">45</span> h</div>
 </div>
 
 <script>
-const salaryEl=()=>document.getElementById('salary');
-const hoursPerDay=document.getElementById('hoursPerDay');
-const days=document.getElementById('days');
-const overtime=document.getElementById('overtime');
-const night=document.getElementById('night');
-const holiday=document.getElementById('holiday');
-const preset=document.getElementById('preset');
-const customBox=document.getElementById('customBox');
-const otRate=document.getElementById('otRate');
-const nightRate=document.getElementById('nightRate');
-const holidayRate=document.getElementById('holidayRate');
-const hourlyEl=()=>document.getElementById('hourly');
-const overtimePayEl=()=>document.getElementById('overtimePay');
-const nightPayEl=()=>document.getElementById('nightPay');
-const holidayPayEl=()=>document.getElementById('holidayPay');
-const totalEl=()=>document.getElementById('total');
-const valueHour=document.getElementById('valueHour');
+const todayInput=document.getElementById('today');
+const totalEl=document.getElementById('total');
+const remainEl=document.getElementById('remain');
 
-const inputs=["salary","hoursPerDay","days","overtime","night","holiday","otRate","nightRate","holidayRate"];
-inputs.forEach(id=>{const el=document.getElementById(id); if(el) el.addEventListener("input",calc)});
-preset.addEventListener("change",applyPreset);
+let total=parseFloat(localStorage.getItem('overtime_total'))||0;
+update();
 
-function yen(v){return v.toLocaleString()+"円"}
+todayInput.addEventListener('change',()=>{
+  const val=parseFloat(todayInput.value)||0;
+  total+=val;
+  localStorage.setItem('overtime_total',total);
+  todayInput.value='';
+  update();
+});
 
-function applyPreset(){
- const p=preset.value;
- customBox.style.display = (p==='custom') ? 'block' : 'none';
- if(p==="legal") setRates(1.25,1.5,1.35);
- if(p==="better") setRates(1.3,1.5,1.35);
- if(p==="gov") setRates(1.25,1.5,1.35);
- calc();
+function update(){
+  totalEl.textContent=total.toFixed(2);
+  const remain=45-total;
+  remainEl.textContent=remain.toFixed(2);
+  remainEl.className=remain<0?'warn':'';
 }
-
-function setRates(a,b,c){otRate.value=a;nightRate.value=b;holidayRate.value=c}
-
-function calc(){
-let salary=+salaryEl().value||0;
-let hpd=+hoursPerDay.value||0;
-let daysVal=+days.value||0;
-let overtimeH=+overtime.value||0;
-let nightH=+night.value||0;
-let holidayH=+holiday.value||0;
-let ot=+otRate.value||1.25;
-let nr=+nightRate.value||1.5;
-let hr=+holidayRate.value||1.35;
-
-let baseHours=hpd*daysVal;
-if(baseHours<=0){reset();return}
-
-let hourly=salary/baseHours;
-let overtimePay=hourly*ot*overtimeH;
-let nightPay=hourly*nr*nightH;
-let holidayPay=hourly*hr*holidayH;
-let total=overtimePay+nightPay+holidayPay;
-
-hourlyEl().textContent=yen(Math.round(hourly));
-valueHour.textContent=yen(Math.round(hourly*ot));
-overtimePayEl().textContent=yen(Math.round(overtimePay));
-nightPayEl().textContent=yen(Math.round(nightPay));
-holidayPayEl().textContent=yen(Math.round(holidayPay));
-totalEl().textContent=yen(Math.round(total));
-}
-
-function reset(){[hourlyEl(),valueHour,overtimePayEl(),nightPayEl(),holidayPayEl(),totalEl()].forEach(e=>e.textContent='-')}
-
-applyPreset();
 </script>
+
 </body>
 </html>
