@@ -4,23 +4,70 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>残業価値メーター</title>
+
 <style>
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#f4f6f8;margin:0;padding:16px}
+body{
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  background:#f4f6f8;margin:0;padding:16px
+}
 .container{max-width:720px;margin:auto}
 h1{text-align:center}
-.card{background:#fff;border-radius:14px;padding:16px;margin:12px 0;box-shadow:0 4px 10px rgba(0,0,0,.06)}
+
+.card{
+  background:#fff;border-radius:14px;padding:16px;margin:12px 0;
+  box-shadow:0 4px 10px rgba(0,0,0,.06)
+}
+
 label{display:block;margin-top:10px;font-size:14px}
-input,select{width:100%;padding:10px;margin-top:4px;border-radius:8px;border:1px solid #ccc;font-size:16px}
+input,select{
+  width:100%;padding:10px;margin-top:4px;
+  border-radius:8px;border:1px solid #ccc;font-size:16px
+}
+
 .result{font-size:20px;font-weight:bold;margin-top:6px}
 .small{color:#666;font-size:13px}
+
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .hidden{display:none}
-@media(max-width:500px){.grid{grid-template-columns:1fr}}
+
+.notice{
+  font-size:13px;color:#666;margin-top:10px
+}
+
+.feedback{
+  text-align:center;margin-top:18px
+}
+.feedback a{
+  display:inline-block;
+  padding:12px 18px;
+  background:#ff7a00;
+  color:white;
+  font-weight:bold;
+  border-radius:8px;
+  text-decoration:none;
+  box-shadow:0 2px 6px rgba(0,0,0,0.2);
+}
+
+@media(max-width:500px){
+  .grid{grid-template-columns:1fr}
+}
 </style>
 </head>
+
 <body>
 <div class="container">
 <h1>残業価値メーター</h1>
+
+<div class="card">
+<h2>このツールについて</h2>
+<div class="small">
+月給・労働時間を入力すると、残業1時間の価値や手当額を自動計算します。<br>
+数日分まとめて入力してもOKです。
+</div>
+<div class="notice">
+※データはあなたの端末内だけで計算され、外部送信は行われません
+</div>
+</div>
 
 <div class="card">
 <h2>基本情報</h2>
@@ -31,12 +78,15 @@ input,select{width:100%;padding:10px;margin-top:4px;border-radius:8px;border:1px
 
 <div class="card">
 <h2>割増率設定</h2>
-<label>プリセット<select id="preset">
+<label>プリセット
+<select id="preset">
 <option value="legal">法定どおり</option>
 <option value="better">優遇企業（残業30%）</option>
 <option value="gov">公務員想定</option>
 <option value="custom">カスタム</option>
-</select></label>
+</select>
+</label>
+
 <div id="customBox" class="hidden">
 <label>残業倍率<input id="otRate" type="number" step="0.01" value="1.25"></label>
 <label>深夜倍率<input id="nightRate" type="number" step="0.01" value="1.50"></label>
@@ -61,18 +111,14 @@ input,select{width:100%;padding:10px;margin-top:4px;border-radius:8px;border:1px
 <div><div class="small">休日手当</div><div class="result" id="holidayPay">-</div></div>
 <div><div class="small">追加収入合計</div><div class="result" id="total">-</div></div>
 </div>
-</div>
 
-<div class="card">
-<h2>フィードバック</h2>
-<p class="small">使ってみて気づいた点・追加してほしい機能があれば教えてください。<br>
-※データはあなたの端末内だけに保存され、外部送信されません</p>
-<a href="https://note.com/tool_lab_dev" target="_blank"
-style="display:block;text-align:center;margin-top:10px;padding:12px;border-radius:10px;background:#111;color:#fff;text-decoration:none;font-weight:bold">
-💬 要望・不具合を送る
+<div class="feedback">
+<a href="https://forms.gle/vuLwvdTqvhHNf7v96" target="_blank">
+💬 ご意見・不具合報告はこちら
 </a>
 </div>
 
+</div>
 </div>
 
 <script>
@@ -95,7 +141,11 @@ const totalEl=()=>document.getElementById('total');
 const valueHour=document.getElementById('valueHour');
 
 const inputs=["salary","hoursPerDay","days","overtime","night","holiday","otRate","nightRate","holidayRate"];
-inputs.forEach(id=>{const el=document.getElementById(id); if(el) el.addEventListener("input",calc)});
+inputs.forEach(id=>{
+ const el=document.getElementById(id);
+ if(el) el.addEventListener("input",calc)
+});
+
 preset.addEventListener("change",applyPreset);
 
 function yen(v){return v.toLocaleString()+"円"}
@@ -109,7 +159,11 @@ function applyPreset(){
  calc();
 }
 
-function setRates(a,b,c){otRate.value=a;nightRate.value=b;holidayRate.value=c}
+function setRates(a,b,c){
+ otRate.value=a;
+ nightRate.value=b;
+ holidayRate.value=c;
+}
 
 function calc(){
 let salary=+salaryEl().value||0;
@@ -139,7 +193,10 @@ holidayPayEl().textContent=yen(Math.round(holidayPay));
 totalEl().textContent=yen(Math.round(total));
 }
 
-function reset(){[hourlyEl(),valueHour,overtimePayEl(),nightPayEl(),holidayPayEl(),totalEl()].forEach(e=>e.textContent='-')}
+function reset(){
+[hourlyEl(),valueHour,overtimePayEl(),nightPayEl(),holidayPayEl(),totalEl()]
+.forEach(e=>e.textContent='-')
+}
 
 applyPreset();
 </script>
