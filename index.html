@@ -23,17 +23,6 @@ input,select{width:100%;padding:10px;margin-top:4px;border-radius:8px;border:1px
 <h1>残業価値メーター</h1>
 
 <div class="card">
-<h2>このツールの使い方</h2>
-<div class="small">
-① 月給・労働時間・労働日数を入力すると通常時給が計算されます<br>
-② 割増率は会社の就業規則に合わせてプリセットかカスタムを選択<br>
-③ 残業・深夜・休日労働時間の合計を入れると「いくら増えたか」が表示されます<br>
-④ 金額はすべて概算です（税金・社会保険料は考慮していません）<br>
-※データはあなたの端末内だけに保存され、外部送信されません
-</div>
-</div>
-
-<div class="card">
 <h2>基本情報</h2>
 <label>月給（円）<input id="salary" type="number"></label>
 <label>1日の労働時間<input id="hoursPerDay" type="number" step="0.1"></label>
@@ -73,6 +62,17 @@ input,select{width:100%;padding:10px;margin-top:4px;border-radius:8px;border:1px
 <div><div class="small">追加収入合計</div><div class="result" id="total">-</div></div>
 </div>
 </div>
+
+<div class="card">
+<h2>フィードバック</h2>
+<p class="small">使ってみて気づいた点・追加してほしい機能があれば教えてください。<br>
+※データはあなたの端末内だけに保存され、外部送信されません</p>
+<a href="https://note.com/tool_lab_dev" target="_blank"
+style="display:block;text-align:center;margin-top:10px;padding:12px;border-radius:10px;background:#111;color:#fff;text-decoration:none;font-weight:bold">
+💬 要望・不具合を送る
+</a>
+</div>
+
 </div>
 
 <script>
